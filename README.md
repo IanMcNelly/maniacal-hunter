@@ -32,4 +32,4 @@ This is a list of desired features. The plugin is currently in a skeleton state.
 
 
 ### Notifications 
-*   At the moment, notifications are handled by the default hunter plugin, and pretty well. This is intended to supplement, not replace
+*   At the moment, trap otifications are handled by the default hunter plugin, and pretty well. This is intended to supplement, not replace
