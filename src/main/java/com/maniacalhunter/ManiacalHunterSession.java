@@ -2,11 +2,7 @@ package com.maniacalhunter;
 
 import java.time.Duration;
 import java.time.Instant;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 public class ManiacalHunterSession
 {
 	private Instant sessionStartTime;
@@ -56,10 +52,6 @@ public class ManiacalHunterSession
 		this.damagedTailsSincePerfect = 0;
 	}
 
-	/**
-	 * Increments the number of damaged tails and the dryness.
-	 * Dryness is considered the number of damaged tails since the last perfect tail.
-	 */
 	public void incrementDamagedTails()
 	{
 		this.damagedTails++;
@@ -72,7 +64,6 @@ public class ManiacalHunterSession
 		{
 			return 0;
 		}
-		// Formula for probability of getting at least one drop is 1 - (1 - 1/droprate)^kills
 		return (1.0 - Math.pow(1.0 - (1.0 / 5000.0), damagedTailsSincePerfect)) * 100;
 	}
 
@@ -93,4 +84,46 @@ public class ManiacalHunterSession
 		}
 		return (double) monkeysCaught / (duration.toMillis() / 3600000.0);
 	}
+
+	public double getXpPerHour()
+	{
+		if (duration == null || duration.isZero())
+		{
+			return 0;
+		}
+		return (double) xpGained / (duration.toMillis() / 3600000.0);
+	}
+
+	public double getAverageTimePerCatch()
+	{
+		if (monkeysCaught == 0 || duration == null || duration.isZero())
+		{
+			return 0;
+		}
+		return (double) duration.toMillis() / monkeysCaught / 1000.0;
+	}
+
+	// Getters
+	public Instant getSessionStartTime() { return sessionStartTime; }
+	public Duration getDuration() { return duration; }
+	public int getStartXp() { return startXp; }
+	public int getXpGained() { return xpGained; }
+	public int getMonkeysCaught() { return monkeysCaught; }
+	public int getTrapsLaid() { return trapsLaid; }
+	public String getLastTrapStatus() { return lastTrapStatus; }
+	public int getPerfectTails() { return perfectTails; }
+	public int getDamagedTails() { return damagedTails; }
+	public int getDamagedTailsSincePerfect() { return damagedTailsSincePerfect; }
+
+	// Setters
+	public void setSessionStartTime(Instant sessionStartTime) { this.sessionStartTime = sessionStartTime; }
+	public void setDuration(Duration duration) { this.duration = duration; }
+	public void setStartXp(int startXp) { this.startXp = startXp; }
+	public void setXpGained(int xpGained) { this.xpGained = xpGained; }
+	public void setMonkeysCaught(int monkeysCaught) { this.monkeysCaught = monkeysCaught; }
+	public void setTrapsLaid(int trapsLaid) { this.trapsLaid = trapsLaid; }
+	public void setLastTrapStatus(String lastTrapStatus) { this.lastTrapStatus = lastTrapStatus; }
+	public void setPerfectTails(int perfectTails) { this.perfectTails = perfectTails; }
+	public void setDamagedTails(int damagedTails) { this.damagedTails = damagedTails; }
+	public void setDamagedTailsSincePerfect(int damagedTailsSincePerfect) { this.damagedTailsSincePerfect = damagedTailsSincePerfect; }
 }

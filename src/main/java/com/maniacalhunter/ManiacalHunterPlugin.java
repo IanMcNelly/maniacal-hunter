@@ -5,7 +5,6 @@ import com.google.inject.Provides;
 import java.time.Duration;
 import java.time.Instant;
 import javax.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
@@ -23,15 +22,24 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.Notifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 @PluginDescriptor(
 	name = "Maniacal Hunter"
 )
 public class ManiacalHunterPlugin extends Plugin
 {
+	private static final Logger log = LoggerFactory.getLogger(ManiacalHunterPlugin.class);
+	private static final String RESET_BUTTON_KEY = "resetSessionButton";
+
 	@Inject
 	private Client client;
+
+	@Inject
+	private Notifier notifier;
 
 	@Inject
 	private ManiacalHunterConfig config;
@@ -101,10 +109,6 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
-		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Maniacal Hunter says " + config.greeting(), null);
-		}
 	}
 
 	@Subscribe
@@ -211,6 +215,11 @@ public class ManiacalHunterPlugin extends Plugin
 		{
 			session.incrementMonkeysCaught();
 			aggregateSession.incrementMonkeysCaught();
+
+			if (config.milestoneNotification() && session.getMonkeysCaught() % config.milestoneInterval() == 0)
+			{
+				notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
+			}
 		}
 		else if (message.equals("You set the boulder trap."))
 		{
@@ -239,5 +248,33 @@ public class ManiacalHunterPlugin extends Plugin
 	public ManiacalHunterSession getAggregateSession()
 	{
 		return aggregateSession;
+	}
+
+	public void setSession(ManiacalHunterSession session)
+	{
+		this.session = session;
+	}
+
+	public Notifier getNotifier()
+	{
+		return notifier;
+	}
+
+	public void setNotifier(Notifier notifier)
+	{
+		this.notifier = notifier;
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (event.getGroup().equals(CONFIG_GROUP) && event.getKey().equals(RESET_BUTTON_KEY))
+		{
+			if (config.resetSession())
+			{
+				reset();
+				configManager.setConfiguration(CONFIG_GROUP, RESET_BUTTON_KEY, false);
+			}
+		}
 	}
 }

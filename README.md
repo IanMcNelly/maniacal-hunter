@@ -4,32 +4,30 @@ A RuneLite plugin to track your stats while hunting maniacal monkeys in Kruk's d
 
 ## Features
 
-This is a list of desired features. The plugin is currently in a skeleton state.
-
-### Core functionality
-*.  Track amount of XP received 
+### Core Functionality
+*   Track amount of XP received
 *   Track number of monkeys caught.
 *   Track number of traps laid.
 *   Track last trap status.
 *   Track time spent in the dungeon.
-*   Track monkeys caught per hour
 *   Track monkey catch success rate
 *   Track number of perfect tails received
 *   Track dryness of getting perfect tail
-*   Display these stats in a customizable overlay.
 
-### Customization
-*   Allow the user to select which metrics to display in the overlay.
-*   Allow the user to customize the format of the display (e.g., colors, font size, layout).
-*   Allow the user to reset the tracked stats.
+### Overlay
+*   Fully customizable overlay to display your hunting stats.
+*   Choose which stats to display.
+*   Toggle between session, aggregate, or both display modes.
 
-### Advanced features
+### Advanced Features
 *   Calculate and display experience rates (XP/hour).
 *   Calculate and display monkeys caught per hour.
 *   Averge time per catch.
-*   Notifications for certain milestones (e.g., 100 monkeys caught).
 *   Session-based tracking, with the ability to track hunting on a per session and cross session basis
 
+### Notifications
+*   Customizable milestone notifications for monkeys caught.
 
-### Notifications 
-*   At the moment, trap otifications are handled by the default hunter plugin, and pretty well. This is intended to supplement, not replace
+## Screenshots
+
+_Coming soon..._
