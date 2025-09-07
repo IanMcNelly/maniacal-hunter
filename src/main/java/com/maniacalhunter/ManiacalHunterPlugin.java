@@ -1,5 +1,6 @@
 package com.maniacalhunter;
 
+import com.google.gson.Gson;
 import com.google.inject.Provides;
 import java.time.Duration;
 import java.time.Instant;
@@ -36,7 +37,15 @@ public class ManiacalHunterPlugin extends Plugin
 	private ManiacalHunterConfig config;
 
 	@Inject
+	private ConfigManager configManager;
+
+	@Inject
+	private Gson gson;
+
+	@Inject
 	private ManiacalHunterSession session;
+
+	private ManiacalHunterSession aggregateSession = new ManiacalHunterSession();
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -54,10 +63,14 @@ public class ManiacalHunterPlugin extends Plugin
 		lastDamagedTails = 0;
 	}
 
+	private static final String CONFIG_GROUP = "maniacalhunter";
+	private static final String AGGREGATE_SESSION_KEY = "aggregateSession";
+
 	@Override
 	protected void startUp() throws Exception
 	{
 		log.info("Maniacal Hunter started!");
+		loadSession();
 		reset();
 		overlayManager.add(overlay);
 	}
@@ -66,7 +79,23 @@ public class ManiacalHunterPlugin extends Plugin
 	protected void shutDown() throws Exception
 	{
 		log.info("Maniacal Hunter stopped!");
+		saveSession();
 		overlayManager.remove(overlay);
+	}
+
+	private void saveSession()
+	{
+		String json = gson.toJson(aggregateSession);
+		configManager.setConfiguration(CONFIG_GROUP, AGGREGATE_SESSION_KEY, json);
+	}
+
+	private void loadSession()
+	{
+		String json = configManager.getConfiguration(CONFIG_GROUP, AGGREGATE_SESSION_KEY);
+		if (json != null)
+		{
+			aggregateSession = gson.fromJson(json, ManiacalHunterSession.class);
+		}
 	}
 
 	@Subscribe
@@ -81,8 +110,6 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event)
 	{
-		// This implementation is not perfect. It can be fooled by dropping or banking tails.
-		// A more robust implementation would require tracking items across all containers, which is out of scope for this plugin.
 		if (event.getContainerId() != 93) // Inventory
 		{
 			return;
@@ -97,11 +124,13 @@ public class ManiacalHunterPlugin extends Plugin
 		if (perfectTailsGained > 0)
 		{
 			session.incrementPerfectTails();
+			aggregateSession.incrementPerfectTails();
 		}
 
 		if (damagedTailsGained > 0)
 		{
 			session.incrementDamagedTails();
+			aggregateSession.incrementDamagedTails();
 		}
 
 		lastPerfectTails = currentPerfectTails;
@@ -114,6 +143,7 @@ public class ManiacalHunterPlugin extends Plugin
 		if (session.getSessionStartTime() != null)
 		{
 			session.setDuration(Duration.between(session.getSessionStartTime(), Instant.now()));
+			aggregateSession.setDuration(Duration.between(aggregateSession.getSessionStartTime(), Instant.now()));
 		}
 	}
 
@@ -130,8 +160,10 @@ public class ManiacalHunterPlugin extends Plugin
 			if (session.getStartXp() == 0)
 			{
 				session.startSession(statChanged.getXp());
+				aggregateSession.startSession(statChanged.getXp());
 			}
 			session.setXpGained(statChanged.getXp() - session.getStartXp());
+			aggregateSession.setXpGained(statChanged.getXp() - aggregateSession.getStartXp());
 		}
 	}
 
@@ -152,18 +184,22 @@ public class ManiacalHunterPlugin extends Plugin
 		if (id == ManiacalHunterConstants.SET_BOULDER_TRAP)
 		{
 			session.setLastTrapStatus("Trap set");
+			aggregateSession.setLastTrapStatus("Trap set");
 		}
 		else if (id == ManiacalHunterConstants.UNSET_BOULDER_TRAP)
 		{
 			session.setLastTrapStatus("Trap not set");
+			aggregateSession.setLastTrapStatus("Trap not set");
 		}
 		else if (id == ManiacalHunterConstants.TRIGGERED_BOULDER_TRAP_1 || id == ManiacalHunterConstants.TRIGGERED_BOULDER_TRAP_2)
 		{
 			session.setLastTrapStatus("Trap triggered");
+			aggregateSession.setLastTrapStatus("Trap triggered");
 		}
 		else if (id == ManiacalHunterConstants.CAUGHT_MONKEY_BOULDER_1 || id == ManiacalHunterConstants.CAUGHT_MONKEY_BOULDER_2)
 		{
 			session.setLastTrapStatus("Monkey caught");
+			aggregateSession.setLastTrapStatus("Monkey caught");
 		}
 	}
 
@@ -174,10 +210,12 @@ public class ManiacalHunterPlugin extends Plugin
 		if (message.equals("You get a tail from the monkey."))
 		{
 			session.incrementMonkeysCaught();
+			aggregateSession.incrementMonkeysCaught();
 		}
 		else if (message.equals("You set the boulder trap."))
 		{
 			session.incrementTrapsLaid();
+			aggregateSession.incrementTrapsLaid();
 		}
 	}
 
@@ -191,5 +229,15 @@ public class ManiacalHunterPlugin extends Plugin
 	ManiacalHunterSession provideSession()
 	{
 		return new ManiacalHunterSession();
+	}
+
+	public ManiacalHunterSession getSession()
+	{
+		return session;
+	}
+
+	public ManiacalHunterSession getAggregateSession()
+	{
+		return aggregateSession;
 	}
 }

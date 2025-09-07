@@ -11,21 +11,24 @@ import net.runelite.client.ui.overlay.components.TitleComponent;
 
 public class ManiacalHunterOverlay extends OverlayPanel
 {
+	private final ManiacalHunterPlugin plugin;
 	private final ManiacalHunterConfig config;
-	private final ManiacalHunterSession session;
 
 	@Inject
-	private ManiacalHunterOverlay(ManiacalHunterConfig config, ManiacalHunterSession session)
+	private ManiacalHunterOverlay(ManiacalHunterPlugin plugin, ManiacalHunterConfig config)
 	{
-		super(null);
+		super(plugin);
+		this.plugin = plugin;
 		this.config = config;
-		this.session = session;
 		setPosition(OverlayPosition.TOP_LEFT);
 	}
 
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		ManiacalHunterSession session = plugin.getSession();
+		ManiacalHunterSession aggregateSession = plugin.getAggregateSession();
+
 		panelComponent.getChildren().clear();
 
 		panelComponent.getChildren().add(TitleComponent.builder()
@@ -35,17 +38,17 @@ public class ManiacalHunterOverlay extends OverlayPanel
 
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("XP Gained:")
-			.right(String.valueOf(session.getXpGained()))
+			.right(formatStat(session.getXpGained(), aggregateSession.getXpGained()))
 			.build());
 
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Monkeys Caught:")
-			.right(String.valueOf(session.getMonkeysCaught()))
+			.right(formatStat(session.getMonkeysCaught(), aggregateSession.getMonkeysCaught()))
 			.build());
 
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Traps Laid:")
-			.right(String.valueOf(session.getTrapsLaid()))
+			.right(formatStat(session.getTrapsLaid(), aggregateSession.getTrapsLaid()))
 			.build());
 
 		panelComponent.getChildren().add(LineComponent.builder()
@@ -55,29 +58,74 @@ public class ManiacalHunterOverlay extends OverlayPanel
 
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Success Rate:")
-			.right(String.format("%.2f%%", session.getSuccessRate()))
+			.right(formatPercentage(session.getSuccessRate(), aggregateSession.getSuccessRate()))
 			.build());
 
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Monkeys/Hour:")
-			.right(String.format("%.2f", session.getMonkeysPerHour()))
+			.right(formatDouble(session.getMonkeysPerHour(), aggregateSession.getMonkeysPerHour()))
 			.build());
 
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Perfect Tails:")
-			.right(String.valueOf(session.getPerfectTails()))
+			.right(formatStat(session.getPerfectTails(), aggregateSession.getPerfectTails()))
 			.build());
 
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Damaged Tails:")
-			.right(String.valueOf(session.getDamagedTails()))
+			.right(formatStat(session.getDamagedTails(), aggregateSession.getDamagedTails()))
 			.build());
 
 		panelComponent.getChildren().add(LineComponent.builder()
 			.left("Luck:")
-			.right(String.format("%.2f%%", session.getLuckPercentage()))
+			.right(formatPercentage(session.getLuckPercentage(), aggregateSession.getLuckPercentage()))
 			.build());
 
 		return super.render(graphics);
+	}
+
+	private String formatStat(int session, int aggregate)
+	{
+		switch (config.displayMode())
+		{
+			case SESSION_ONLY:
+				return String.valueOf(session);
+			case AGGREGATE_ONLY:
+				return String.valueOf(aggregate);
+			case BOTH:
+				return String.format("%d (%d)", session, aggregate);
+			default:
+				return "";
+		}
+	}
+
+	private String formatPercentage(double session, double aggregate)
+	{
+		switch (config.displayMode())
+		{
+			case SESSION_ONLY:
+				return String.format("%.2f%%", session);
+			case AGGREGATE_ONLY:
+				return String.format("%.2f%%", aggregate);
+			case BOTH:
+				return String.format("%.2f%% (%.2f%%)", session, aggregate);
+			default:
+				return "";
+		}
+	}
+
+	private String formatDouble(double session, double aggregate)
+	{
+		switch (config.displayMode())
+		{
+			case SESSION_ONLY:
+				return String.format("%.2f", session);
+			case AGGREGATE_ONLY:
+				return String.format("%.2f", aggregate);
+			case BOTH:
+				return String.format("%.2f (%.2f)", session, aggregate);
+			default:
+				return "";
+		}
 	}
 }

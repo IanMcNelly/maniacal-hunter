@@ -16,4 +16,14 @@ public interface ManiacalHunterConfig extends Config
 	{
 		return "Hello";
 	}
+
+	@ConfigItem(
+		keyName = "displayMode",
+		name = "Display Mode",
+		description = "Choose which stats to display in the overlay"
+	)
+	default DisplayMode displayMode()
+	{
+		return DisplayMode.SESSION_ONLY;
+	}
 }
