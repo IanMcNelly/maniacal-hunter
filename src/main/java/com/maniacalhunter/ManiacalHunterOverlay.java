@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import javax.inject.Inject;
+
+import net.runelite.api.Client;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.ImageComponent;
@@ -16,20 +18,31 @@ public class ManiacalHunterOverlay extends OverlayPanel
 	private final ManiacalHunterPlugin plugin;
 	private final ManiacalHunterConfig config;
 	private final BufferedImage icon;
+	private final Client client;
 
 	@Inject
-	private ManiacalHunterOverlay(ManiacalHunterPlugin plugin, ManiacalHunterConfig config)
+	private ManiacalHunterOverlay(ManiacalHunterPlugin plugin, ManiacalHunterConfig config, Client client)
 	{
 		super(plugin);
 		this.plugin = plugin;
 		this.config = config;
 		this.icon = plugin.getIcon();
+		this.client = client;
 		setPosition(OverlayPosition.TOP_LEFT);
+	}
+
+	private boolean isInManiacalHunterArea()
+	{
+		return client.getLocalPlayer() != null && client.getLocalPlayer().getWorldLocation().getRegionID() == ManiacalHunterConstants.MANIACAL_HUNTER_REGION;
 	}
 
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
+		if (!isInManiacalHunterArea())
+		{
+			return null;
+		}
 		ManiacalHunterSession session = plugin.getSession();
 		ManiacalHunterSession aggregateSession = plugin.getAggregateSession();
 
