@@ -71,6 +71,7 @@ public class ManiacalHunterPlugin extends Plugin
 
 	private int lastPerfectTails = 0;
 	private int lastDamagedTails = 0;
+	private int lastHunterXp = -1;
 
 	private void reset()
 	{
@@ -118,6 +119,10 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
+		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+		{
+			lastHunterXp = client.getSkillExperience(Skill.HUNTER);
+		}
 	}
 
 	@Subscribe
@@ -168,6 +173,9 @@ public class ManiacalHunterPlugin extends Plugin
 		if (session.getSessionStartTime() != null)
 		{
 			session.setDuration(Duration.between(session.getSessionStartTime(), Instant.now()));
+		}
+		if (aggregateSession.getSessionStartTime() != null)
+		{
 			aggregateSession.setDuration(Duration.between(aggregateSession.getSessionStartTime(), Instant.now()));
 		}
 		mousePosition = client.getMouseCanvasPosition();
@@ -181,19 +189,40 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged)
 	{
-		if (statChanged.getSkill() == Skill.HUNTER && isInManiacalHunterArea())
+		if (statChanged.getSkill() != Skill.HUNTER || !isInManiacalHunterArea())
 		{
-			if (session.getStartXp() == 0)
+			return;
+		}
+
+		if (lastHunterXp == -1)
+		{
+			lastHunterXp = statChanged.getXp();
+			return;
+		}
+
+		int currentXp = statChanged.getXp();
+		int gainedXp = currentXp - lastHunterXp;
+		lastHunterXp = currentXp;
+
+		if (gainedXp > 0)
+		{
+			// Current session
+			if (session.getSessionStartTime() == null)
 			{
-				session.startSession(statChanged.getXp());
-				aggregateSession.startSession(statChanged.getXp());
+				session.startSession(currentXp - gainedXp);
 			}
-			session.setXpGained(statChanged.getXp() - session.getStartXp());
-			aggregateSession.setXpGained(statChanged.getXp() - aggregateSession.getStartXp());
+			session.setXpGained(session.getXpGained() + gainedXp);
+
+			// Aggregate session
+			if (aggregateSession.getSessionStartTime() == null)
+			{
+				aggregateSession.startSession(currentXp - gainedXp);
+			}
+			aggregateSession.setXpGained(aggregateSession.getXpGained() + gainedXp);
 		}
 	}
 
-	private static final int MAX_DISTANCE = 10;
+	private static final int MAX_DISTANCE = 2;
 
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
