@@ -2,6 +2,7 @@ package com.maniacalhunter;
 
 import com.google.gson.Gson;
 import com.google.inject.Provides;
+import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.time.Instant;
 import javax.inject.Inject;
@@ -10,6 +11,8 @@ import net.runelite.api.Client;
 import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
 import net.runelite.api.Skill;
+import net.runelite.api.events.PlayerDespawned;
+import net.runelite.api.events.PlayerSpawned;
 import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
@@ -23,6 +26,10 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.Notifier;
+import net.runelite.client.ui.ClientUI;
+import net.runelite.client.util.ImageUtil;
+import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
+import net.runelite.api.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +40,10 @@ public class ManiacalHunterPlugin extends Plugin
 {
 	private static final Logger log = LoggerFactory.getLogger(ManiacalHunterPlugin.class);
 	private static final String RESET_BUTTON_KEY = "resetSessionButton";
+	private static final String ICON_FILE = "condensed_icon.png";
+
+	private BufferedImage icon;
+	private Point mousePosition;
 
 	@Inject
 	private Client client;
@@ -62,16 +73,17 @@ public class ManiacalHunterPlugin extends Plugin
 
 	private int lastPerfectTails = 0;
 	private int lastDamagedTails = 0;
-	private int lastHunterXp = 0;
 	private int catchesThisTick = 0;
 	private int lastTick = 0;
+	private int lastHunterXp = -1;
+	private boolean inHunterArea = false;
 
 	private void reset()
 	{
 		session.reset();
 		lastPerfectTails = 0;
 		lastDamagedTails = 0;
-		lastHunterXp = 0;
+		lastHunterXp = -1;
 		catchesThisTick = 0;
 		lastTick = 0;
 	}
@@ -85,6 +97,7 @@ public class ManiacalHunterPlugin extends Plugin
 		log.info("Maniacal Hunter started!");
 		loadSession();
 		reset();
+		icon = ImageUtil.loadImageResource(getClass(), ICON_FILE);
 		overlayManager.add(overlay);
 	}
 
@@ -114,12 +127,16 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
+		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+		{
+			lastHunterXp = client.getSkillExperience(Skill.HUNTER);
+		}
 	}
 
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event)
 	{
-		if (event.getContainerId() != 93) // Inventory
+		if (!isInManiacalHunterArea() || event.getContainerId() != 93) // Inventory
 		{
 			return;
 		}
@@ -159,16 +176,61 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
+  
+    if (!isInManiacalHunterArea())
+		{
+			return;
+		}
 		if (client.getTickCount() != lastTick)
 		{
 			catchesThisTick = 0;
 			lastTick = client.getTickCount();
-		}
-
+    }
 		if (session.getSessionStartTime() != null)
 		{
 			session.setDuration(Duration.between(session.getSessionStartTime(), Instant.now()));
+		}
+		if (aggregateSession.getSessionStartTime() != null)
+		{
 			aggregateSession.setDuration(Duration.between(aggregateSession.getSessionStartTime(), Instant.now()));
+		}
+		mousePosition = client.getMouseCanvasPosition();
+	}
+
+	@Subscribe
+	public void onPlayerSpawned(PlayerSpawned event)
+	{
+		if (event.getPlayer() != client.getLocalPlayer())
+		{
+			return;
+		}
+
+		boolean currentlyInArea = isInManiacalHunterArea();
+		if (currentlyInArea)
+		{
+			inHunterArea = true;
+			if (config.autoResetMode() == ResetMode.ON_ENTER_AREA)
+			{
+				reset();
+			}
+		}
+	}
+
+	@Subscribe
+	public void onPlayerDespawned(PlayerDespawned event)
+	{
+		if (event.getPlayer() != client.getLocalPlayer())
+		{
+			return;
+		}
+
+		if (inHunterArea)
+		{
+			if (config.autoResetMode() == ResetMode.ON_LEAVE_AREA)
+			{
+				reset();
+			}
+			inHunterArea = false;
 		}
 	}
 
@@ -180,40 +242,53 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onStatChanged(StatChanged statChanged)
 	{
-		if (statChanged.getSkill() == Skill.HUNTER && isInManiacalHunterArea())
+		if (statChanged.getSkill() != Skill.HUNTER || !isInManiacalHunterArea())
 		{
-			int currentXp = statChanged.getXp();
-			if (session.getStartXp() == 0)
+			return;
+		}
+
+		if (lastHunterXp == -1)
+		{
+			lastHunterXp = statChanged.getXp();
+			return;
+		}
+
+		int currentXp = statChanged.getXp();
+		int gainedXp = currentXp - lastHunterXp;
+
+		if (gainedXp > 0 && gainedXp % 1000 == 0)
+		{
+			catchesThisTick += gainedXp / 1000;
+		}
+		
+		lastHunterXp = currentXp;
+
+		if (gainedXp > 0)
+		{
+			if (session.getSessionStartTime() == null)
 			{
-				session.startSession(currentXp);
-				aggregateSession.startSession(currentXp);
-				lastHunterXp = currentXp;
+				session.startSession(currentXp - gainedXp);
 			}
+			session.setXpGained(session.getXpGained() + gainedXp);
 
-			if (lastHunterXp == 0) {
-				lastHunterXp = currentXp;
-				return;
-			}
-
-			int xpGainedSinceLastCheck = currentXp - lastHunterXp;
-
-			// Maniacal monkeys give 1000 XP per catch
-			if (xpGainedSinceLastCheck > 0 && xpGainedSinceLastCheck % 1000 == 0)
+			if (aggregateSession.getSessionStartTime() == null)
 			{
-				catchesThisTick += xpGainedSinceLastCheck / 1000;
+				aggregateSession.startSession(currentXp - gainedXp);
 			}
-			lastHunterXp = currentXp;
-
-			session.setXpGained(currentXp - session.getStartXp());
-			aggregateSession.setXpGained(currentXp - aggregateSession.getStartXp());
+			aggregateSession.setXpGained(aggregateSession.getXpGained() + gainedXp);
 		}
 	}
-
-	private static final int MAX_DISTANCE = 10;
+  
+	private static final int MAX_DISTANCE = 2;
 
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
 	{
+		if (!isInManiacalHunterArea())
+		{
+			return;
+		}
+
 		GameObject gameObject = event.getGameObject();
 		if (gameObject == null
 			|| !ManiacalHunterConstants.BOULDER_TRAP_IDS.contains(gameObject.getId())
@@ -267,6 +342,16 @@ public class ManiacalHunterPlugin extends Plugin
 	public ManiacalHunterSession getAggregateSession()
 	{
 		return aggregateSession;
+	}
+
+	public BufferedImage getIcon()
+	{
+		return icon;
+	}
+
+	public Point getMouseCanvasPosition()
+	{
+		return mousePosition;
 	}
 
 	public void setSession(ManiacalHunterSession session)
