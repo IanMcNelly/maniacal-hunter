@@ -39,106 +39,14 @@ public class ManiacalHunterOverlay extends OverlayPanel
 	@Override
 	public Dimension render(Graphics2D graphics)
 	{
-		if (!isInManiacalHunterArea())
-		{
-			return null;
-		}
-		ManiacalHunterSession session = plugin.getSession();
-		ManiacalHunterSession aggregateSession = plugin.getAggregateSession();
-
 		panelComponent.getChildren().clear();
-
-		if (config.condensedMode() && !getBounds().contains(new java.awt.Point(plugin.getMouseCanvasPosition().getX(), plugin.getMouseCanvasPosition().getY())))
-		{
-			panelComponent.getChildren().add(new ImageComponent(icon));
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Caught:")
-				.right(formatStat(session.getMonkeysCaught(), aggregateSession.getMonkeysCaught()))
-				.build());
-			return super.render(graphics);
-		}
-
 		panelComponent.getChildren().add(TitleComponent.builder()
-			.text("Maniacal Hunter")
+			.text("Region ID:")
 			.color(Color.WHITE)
 			.build());
-
-		if (config.showXpGained()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("XP Gained:")
-				.right(formatStat(session.getXpGained(), aggregateSession.getXpGained()))
-				.build());
-		}
-
-		if (config.showMonkeysCaught()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Monkeys Caught:")
-				.right(formatStat(session.getMonkeysCaught(), aggregateSession.getMonkeysCaught()))
-				.build());
-		}
-
-		if (config.showTrapsLaid()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Traps Laid:")
-				.right(formatStat(session.getTrapsLaid(), aggregateSession.getTrapsLaid()))
-				.build());
-		}
-
-		if (config.showLastTrapStatus()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Last Trap Status:")
-				.right(session.getLastTrapStatus())
-				.build());
-		}
-
-		if (config.showSuccessRate()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Success Rate:")
-				.right(formatPercentage(session.getSuccessRate(), aggregateSession.getSuccessRate()))
-				.build());
-		}
-
-		if (config.showMonkeysPerHour()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Monkeys/Hour:")
-				.right(formatDouble(session.getMonkeysPerHour(), aggregateSession.getMonkeysPerHour()))
-				.build());
-		}
-
-		if (config.showPerfectTails()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Perfect Tails:")
-				.right(formatStat(session.getPerfectTails(), aggregateSession.getPerfectTails()))
-				.build());
-		}
-
-		if (config.showDamagedTails()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Damaged Tails:")
-				.right(formatStat(session.getDamagedTails(), aggregateSession.getDamagedTails()))
-				.build());
-		}
-
-		if (config.showLuck()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Luck:")
-				.right(formatPercentage(session.getLuckPercentage(), aggregateSession.getLuckPercentage()))
-				.build());
-		}
-
-		if (config.showXpPerHour()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("XP/Hour:")
-				.right(formatDouble(session.getXpPerHour(), aggregateSession.getXpPerHour()))
-				.build());
-		}
-
-		if (config.showAvgCatchTime()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Avg. Catch Time:")
-				.right(String.format("%.2fs", session.getAverageTimePerCatch()))
-				.build());
-		}
+		panelComponent.getChildren().add(LineComponent.builder()
+			.left(String.valueOf(client.getLocalPlayer().getWorldLocation().getRegionID()))
+			.build());
 
 		return super.render(graphics);
 	}
