@@ -37,6 +37,24 @@ public interface ManiacalHunterConfig extends Config
 		return false;
 	}
 
+	@ConfigSection(
+			name = "Auto Reset",
+			description = "Automatically reset the session",
+			position = 4
+	)
+	String autoResetSection = "autoReset";
+
+	@ConfigItem(
+			keyName = "autoResetMode",
+			name = "Auto Reset Session",
+			description = "Automatically reset the session upon entering or leaving the area",
+			section = autoResetSection
+	)
+	default ResetMode autoResetMode()
+	{
+		return ResetMode.NEVER;
+	}
+
 	@ConfigItem(
 			keyName = "showMonkeysCaught",
 			name = "Show Monkeys Caught",

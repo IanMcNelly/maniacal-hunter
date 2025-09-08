@@ -11,6 +11,8 @@ import net.runelite.api.Client;
 import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
 import net.runelite.api.Skill;
+import net.runelite.api.events.PlayerDespawned;
+import net.runelite.api.events.PlayerSpawned;
 import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
@@ -72,6 +74,7 @@ public class ManiacalHunterPlugin extends Plugin
 	private int lastPerfectTails = 0;
 	private int lastDamagedTails = 0;
 	private int lastHunterXp = -1;
+	private boolean inHunterArea = false;
 
 	private void reset()
 	{
@@ -128,7 +131,7 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onItemContainerChanged(ItemContainerChanged event)
 	{
-		if (event.getContainerId() != 93) // Inventory
+		if (!isInManiacalHunterArea() || event.getContainerId() != 93) // Inventory
 		{
 			return;
 		}
@@ -170,6 +173,11 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
+		if (!isInManiacalHunterArea())
+		{
+			return;
+		}
+
 		if (session.getSessionStartTime() != null)
 		{
 			session.setDuration(Duration.between(session.getSessionStartTime(), Instant.now()));
@@ -179,6 +187,43 @@ public class ManiacalHunterPlugin extends Plugin
 			aggregateSession.setDuration(Duration.between(aggregateSession.getSessionStartTime(), Instant.now()));
 		}
 		mousePosition = client.getMouseCanvasPosition();
+	}
+
+	@Subscribe
+	public void onPlayerSpawned(PlayerSpawned event)
+	{
+		if (event.getPlayer() != client.getLocalPlayer())
+		{
+			return;
+		}
+
+		boolean currentlyInArea = isInManiacalHunterArea();
+		if (currentlyInArea)
+		{
+			inHunterArea = true;
+			if (config.autoResetMode() == ResetMode.ON_ENTER_AREA)
+			{
+				reset();
+			}
+		}
+	}
+
+	@Subscribe
+	public void onPlayerDespawned(PlayerDespawned event)
+	{
+		if (event.getPlayer() != client.getLocalPlayer())
+		{
+			return;
+		}
+
+		if (inHunterArea)
+		{
+			if (config.autoResetMode() == ResetMode.ON_LEAVE_AREA)
+			{
+				reset();
+			}
+			inHunterArea = false;
+		}
 	}
 
 	private boolean isInManiacalHunterArea()
@@ -227,6 +272,11 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
 	{
+		if (!isInManiacalHunterArea())
+		{
+			return;
+		}
+
 		GameObject gameObject = event.getGameObject();
 		if (gameObject == null
 			|| !ManiacalHunterConstants.BOULDER_TRAP_IDS.contains(gameObject.getId())
