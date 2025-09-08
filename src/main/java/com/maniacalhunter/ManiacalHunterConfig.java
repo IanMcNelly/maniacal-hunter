@@ -27,6 +27,17 @@ public interface ManiacalHunterConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "condensedMode",
+			name = "Condensed Mode",
+			description = "Display the overlay in a condensed mode",
+			section = displaySection
+	)
+	default boolean condensedMode()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 			keyName = "showMonkeysCaught",
 			name = "Show Monkeys Caught",
 			description = "Show the total number of monkeys caught",

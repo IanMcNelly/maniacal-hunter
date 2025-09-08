@@ -35,7 +35,7 @@ public class ManiacalHunterOverlay extends OverlayPanel
 
 		panelComponent.getChildren().clear();
 
-		if (config.displayMode() == DisplayMode.CONDENSED && !getBounds().contains(new java.awt.Point(plugin.getMouseCanvasPosition().getX(), plugin.getMouseCanvasPosition().getY())))
+		if (config.condensedMode() && !getBounds().contains(new java.awt.Point(plugin.getMouseCanvasPosition().getX(), plugin.getMouseCanvasPosition().getY())))
 		{
 			panelComponent.getChildren().add(new ImageComponent(icon));
 			panelComponent.getChildren().add(LineComponent.builder()
@@ -139,7 +139,6 @@ public class ManiacalHunterOverlay extends OverlayPanel
 			case AGGREGATE_ONLY:
 				return String.valueOf(aggregate);
 			case BOTH:
-			case CONDENSED:
 				return String.format("%d (%d)", session, aggregate);
 			default:
 				return "";
@@ -155,7 +154,6 @@ public class ManiacalHunterOverlay extends OverlayPanel
 			case AGGREGATE_ONLY:
 				return String.format("%.2f%%", aggregate);
 			case BOTH:
-			case CONDENSED:
 				return String.format("%.2f%% (%.2f%%)", session, aggregate);
 			default:
 				return "";
@@ -171,7 +169,6 @@ public class ManiacalHunterOverlay extends OverlayPanel
 			case AGGREGATE_ONLY:
 				return String.format("%.2f", aggregate);
 			case BOTH:
-			case CONDENSED:
 				return String.format("%.2f (%.2f)", session, aggregate);
 			default:
 				return "";
