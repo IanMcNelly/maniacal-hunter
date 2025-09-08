@@ -62,12 +62,18 @@ public class ManiacalHunterPlugin extends Plugin
 
 	private int lastPerfectTails = 0;
 	private int lastDamagedTails = 0;
+	private int lastHunterXp = 0;
+	private int catchesThisTick = 0;
+	private int lastTick = 0;
 
 	private void reset()
 	{
 		session.reset();
 		lastPerfectTails = 0;
 		lastDamagedTails = 0;
+		lastHunterXp = 0;
+		catchesThisTick = 0;
+		lastTick = 0;
 	}
 
 	private static final String CONFIG_GROUP = "maniacalhunter";
@@ -124,28 +130,26 @@ public class ManiacalHunterPlugin extends Plugin
 		int perfectTailsGained = currentPerfectTails - lastPerfectTails;
 		int damagedTailsGained = currentDamagedTails - lastDamagedTails;
 
-		if (perfectTailsGained > 0)
+		if (catchesThisTick > 0 && (perfectTailsGained > 0 || damagedTailsGained > 0))
 		{
-			session.incrementPerfectTails();
-			aggregateSession.incrementPerfectTails();
-			session.incrementMonkeysCaught();
-			aggregateSession.incrementMonkeysCaught();
-			if (config.milestoneNotification() && session.getMonkeysCaught() % config.milestoneInterval() == 0)
+			if (perfectTailsGained > 0)
 			{
-				notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
+				session.incrementPerfectTails();
+				aggregateSession.incrementPerfectTails();
 			}
-		}
+			if (damagedTailsGained > 0)
+			{
+				session.incrementDamagedTails();
+				aggregateSession.incrementDamagedTails();
+			}
 
-		if (damagedTailsGained > 0)
-		{
-			session.incrementDamagedTails();
-			aggregateSession.incrementDamagedTails();
 			session.incrementMonkeysCaught();
 			aggregateSession.incrementMonkeysCaught();
 			if (config.milestoneNotification() && session.getMonkeysCaught() % config.milestoneInterval() == 0)
 			{
 				notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
 			}
+			catchesThisTick--;
 		}
 
 		lastPerfectTails = currentPerfectTails;
@@ -155,6 +159,12 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
+		if (client.getTickCount() != lastTick)
+		{
+			catchesThisTick = 0;
+			lastTick = client.getTickCount();
+		}
+
 		if (session.getSessionStartTime() != null)
 		{
 			session.setDuration(Duration.between(session.getSessionStartTime(), Instant.now()));
@@ -172,13 +182,30 @@ public class ManiacalHunterPlugin extends Plugin
 	{
 		if (statChanged.getSkill() == Skill.HUNTER && isInManiacalHunterArea())
 		{
+			int currentXp = statChanged.getXp();
 			if (session.getStartXp() == 0)
 			{
-				session.startSession(statChanged.getXp());
-				aggregateSession.startSession(statChanged.getXp());
+				session.startSession(currentXp);
+				aggregateSession.startSession(currentXp);
+				lastHunterXp = currentXp;
 			}
-			session.setXpGained(statChanged.getXp() - session.getStartXp());
-			aggregateSession.setXpGained(statChanged.getXp() - aggregateSession.getStartXp());
+
+			if (lastHunterXp == 0) {
+				lastHunterXp = currentXp;
+				return;
+			}
+
+			int xpGainedSinceLastCheck = currentXp - lastHunterXp;
+
+			// Maniacal monkeys give 1000 XP per catch
+			if (xpGainedSinceLastCheck > 0 && xpGainedSinceLastCheck % 1000 == 0)
+			{
+				catchesThisTick += xpGainedSinceLastCheck / 1000;
+			}
+			lastHunterXp = currentXp;
+
+			session.setXpGained(currentXp - session.getStartXp());
+			aggregateSession.setXpGained(currentXp - aggregateSession.getStartXp());
 		}
 	}
 
