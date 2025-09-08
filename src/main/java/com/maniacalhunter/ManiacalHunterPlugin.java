@@ -211,7 +211,7 @@ public class ManiacalHunterPlugin extends Plugin
 		}
 	}
 
-	private static final int MAX_DISTANCE = 10;
+	private static final int MAX_DISTANCE = 2;
 
 	@Subscribe
 	public void onGameObjectSpawned(GameObjectSpawned event)
