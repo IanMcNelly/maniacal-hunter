@@ -27,6 +27,17 @@ public interface ManiacalHunterConfig extends Config
 	}
 
 	@ConfigItem(
+			keyName = "condensedMode",
+			name = "Condensed Mode",
+			description = "Display the overlay in a condensed mode",
+			section = displaySection
+	)
+	default boolean condensedMode()
+	{
+		return false;
+	}
+
+	@ConfigItem(
 			keyName = "showMonkeysCaught",
 			name = "Show Monkeys Caught",
 			description = "Show the total number of monkeys caught",
@@ -137,14 +148,14 @@ public interface ManiacalHunterConfig extends Config
 	}
 
 	@ConfigItem(
-		keyName = "displayMode",
-		name = "Display Mode",
-		description = "Choose which stats to display in the overlay",
-		position = 1
+			keyName = "displayMode",
+			name = "Display Mode",
+			description = "Choose how to display stats in the overlay",
+			position = 1
 	)
 	default DisplayMode displayMode()
 	{
-		return DisplayMode.SESSION_ONLY;
+		return DisplayMode.BOTH;
 	}
 
 	@ConfigSection(

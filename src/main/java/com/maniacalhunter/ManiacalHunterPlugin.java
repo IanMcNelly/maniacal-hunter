@@ -2,6 +2,7 @@ package com.maniacalhunter;
 
 import com.google.gson.Gson;
 import com.google.inject.Provides;
+import java.awt.image.BufferedImage;
 import java.time.Duration;
 import java.time.Instant;
 import javax.inject.Inject;
@@ -23,6 +24,10 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.Notifier;
+import net.runelite.client.ui.ClientUI;
+import net.runelite.client.util.ImageUtil;
+import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
+import net.runelite.api.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +38,10 @@ public class ManiacalHunterPlugin extends Plugin
 {
 	private static final Logger log = LoggerFactory.getLogger(ManiacalHunterPlugin.class);
 	private static final String RESET_BUTTON_KEY = "resetSessionButton";
+	private static final String ICON_FILE = "condensed_icon.png";
+
+	private BufferedImage icon;
+	private Point mousePosition;
 
 	@Inject
 	private Client client;
@@ -79,6 +88,7 @@ public class ManiacalHunterPlugin extends Plugin
 		log.info("Maniacal Hunter started!");
 		loadSession();
 		reset();
+		icon = ImageUtil.loadImageResource(getClass(), ICON_FILE);
 		overlayManager.add(overlay);
 	}
 
@@ -160,6 +170,7 @@ public class ManiacalHunterPlugin extends Plugin
 			session.setDuration(Duration.between(session.getSessionStartTime(), Instant.now()));
 			aggregateSession.setDuration(Duration.between(aggregateSession.getSessionStartTime(), Instant.now()));
 		}
+		mousePosition = client.getMouseCanvasPosition();
 	}
 
 	private boolean isInManiacalHunterArea()
@@ -240,6 +251,16 @@ public class ManiacalHunterPlugin extends Plugin
 	public ManiacalHunterSession getAggregateSession()
 	{
 		return aggregateSession;
+	}
+
+	public BufferedImage getIcon()
+	{
+		return icon;
+	}
+
+	public Point getMouseCanvasPosition()
+	{
+		return mousePosition;
 	}
 
 	public void setSession(ManiacalHunterSession session)
