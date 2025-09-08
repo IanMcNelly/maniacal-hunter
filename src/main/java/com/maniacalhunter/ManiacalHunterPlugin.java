@@ -28,6 +28,7 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.Notifier;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.api.Point;
 import org.slf4j.Logger;
@@ -40,7 +41,6 @@ public class ManiacalHunterPlugin extends Plugin
 {
 	private static final Logger log = LoggerFactory.getLogger(ManiacalHunterPlugin.class);
 	private static final String RESET_BUTTON_KEY = "resetSessionButton";
-	private static final String ICON_FILE = "condensed_icon.png";
 
 	private BufferedImage icon;
 	private Point mousePosition;
@@ -56,6 +56,9 @@ public class ManiacalHunterPlugin extends Plugin
 
 	@Inject
 	private ConfigManager configManager;
+
+    @Inject
+    private ItemManager itemManager;
 
 	@Inject
 	private Gson gson;
@@ -97,7 +100,7 @@ public class ManiacalHunterPlugin extends Plugin
 		log.info("Maniacal Hunter started!");
 		loadSession();
 		reset();
-		icon = ImageUtil.loadImageResource(getClass(), ICON_FILE);
+		icon = itemManager.getImage(24864);
 		overlayManager.add(overlay);
 	}
 
