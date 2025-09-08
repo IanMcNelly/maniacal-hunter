@@ -15,7 +15,6 @@ import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
-import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.StatChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -129,12 +128,24 @@ public class ManiacalHunterPlugin extends Plugin
 		{
 			session.incrementPerfectTails();
 			aggregateSession.incrementPerfectTails();
+			session.incrementMonkeysCaught();
+			aggregateSession.incrementMonkeysCaught();
+			if (config.milestoneNotification() && session.getMonkeysCaught() % config.milestoneInterval() == 0)
+			{
+				notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
+			}
 		}
 
 		if (damagedTailsGained > 0)
 		{
 			session.incrementDamagedTails();
 			aggregateSession.incrementDamagedTails();
+			session.incrementMonkeysCaught();
+			aggregateSession.incrementMonkeysCaught();
+			if (config.milestoneNotification() && session.getMonkeysCaught() % config.milestoneInterval() == 0)
+			{
+				notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
+			}
 		}
 
 		lastPerfectTails = currentPerfectTails;
@@ -187,6 +198,8 @@ public class ManiacalHunterPlugin extends Plugin
 
 		if (id == ManiacalHunterConstants.SET_BOULDER_TRAP)
 		{
+			session.incrementTrapsLaid();
+			aggregateSession.incrementTrapsLaid();
 			session.setLastTrapStatus("Trap set");
 			aggregateSession.setLastTrapStatus("Trap set");
 		}
@@ -204,27 +217,6 @@ public class ManiacalHunterPlugin extends Plugin
 		{
 			session.setLastTrapStatus("Monkey caught");
 			aggregateSession.setLastTrapStatus("Monkey caught");
-		}
-	}
-
-	@Subscribe
-	public void onChatMessage(ChatMessage chatMessage)
-	{
-		String message = chatMessage.getMessage();
-		if (message.equals("You get a tail from the monkey."))
-		{
-			session.incrementMonkeysCaught();
-			aggregateSession.incrementMonkeysCaught();
-
-			if (config.milestoneNotification() && session.getMonkeysCaught() % config.milestoneInterval() == 0)
-			{
-				notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
-			}
-		}
-		else if (message.equals("You set the boulder trap."))
-		{
-			session.incrementTrapsLaid();
-			aggregateSession.incrementTrapsLaid();
 		}
 	}
 
