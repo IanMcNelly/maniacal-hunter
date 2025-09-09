@@ -41,6 +41,7 @@ public class ManiacalHunterPlugin extends Plugin
 {
 	private static final Logger log = LoggerFactory.getLogger(ManiacalHunterPlugin.class);
 	private static final String RESET_BUTTON_KEY = "resetSessionButton";
+	private static final String RESET_AGGREGATE_BUTTON_KEY = "resetAggregateButton";
 	private static final String CONDENSED_MODE_KEY = "condensedMode";
 
 	private BufferedImage icon;
@@ -95,6 +96,12 @@ public class ManiacalHunterPlugin extends Plugin
 		lastHunterXp = -1;
 		catchesThisTick = 0;
 		lastTick = 0;
+	}
+
+	private void resetAggregate()
+	{
+		aggregateSession.reset();
+		saveSession();
 	}
 
 	private static final String CONFIG_GROUP = "maniacalhunter";
@@ -178,6 +185,7 @@ public class ManiacalHunterPlugin extends Plugin
 				notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
 			}
 			catchesThisTick--;
+			saveSession();
 		}
 
 		lastPerfectTails = currentPerfectTails;
@@ -313,6 +321,7 @@ public class ManiacalHunterPlugin extends Plugin
 			aggregateSession.incrementTrapsLaid();
 			session.setLastTrapStatus("Trap set");
 			aggregateSession.setLastTrapStatus("Trap set");
+			saveSession();
 		}
 		else if (id == ManiacalHunterConstants.TRIGGERED_BOULDER_TRAP_1 || id == ManiacalHunterConstants.TRIGGERED_BOULDER_TRAP_2)
 		{
@@ -386,6 +395,14 @@ public class ManiacalHunterPlugin extends Plugin
 			{
 				reset();
 				configManager.setConfiguration(CONFIG_GROUP, RESET_BUTTON_KEY, false);
+			}
+		}
+		if (event.getKey().equals(RESET_AGGREGATE_BUTTON_KEY))
+		{
+			if (config.resetAggregate())
+			{
+				resetAggregate();
+				configManager.setConfiguration(CONFIG_GROUP, RESET_AGGREGATE_BUTTON_KEY, false);
 			}
 		}
 		if (event.getKey().equals(CONDENSED_MODE_KEY))

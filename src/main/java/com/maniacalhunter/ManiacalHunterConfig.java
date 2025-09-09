@@ -37,6 +37,14 @@ public interface ManiacalHunterConfig extends Config
 		return false;
 	}
 
+	@ConfigItem(
+			keyName = "resetAggregateButton",
+			name = "Reset Aggregate Data",
+			description = "Reset the aggregate session stats",
+			section = actionsSection
+	)
+	default boolean resetAggregate() { return false; }
+
 	@ConfigSection(
 			name = "Auto Reset",
 			description = "Automatically reset the session",
