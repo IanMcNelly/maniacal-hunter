@@ -48,16 +48,6 @@ public class ManiacalHunterOverlay extends OverlayPanel
 
 		panelComponent.getChildren().clear();
 
-		if (config.condensedMode() && !getBounds().contains(new java.awt.Point(plugin.getMouseCanvasPosition().getX(), plugin.getMouseCanvasPosition().getY())))
-		{
-            panelComponent.getChildren().add(imageComponent);
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("Caught:")
-				.right(formatStat(session.getMonkeysCaught(), aggregateSession.getMonkeysCaught()))
-				.build());
-			return super.render(graphics);
-		}
-
 		panelComponent.getChildren().add(TitleComponent.builder()
 			.text("Maniacal Hunter")
 			.color(Color.WHITE)

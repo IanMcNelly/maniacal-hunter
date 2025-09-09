@@ -41,6 +41,7 @@ public class ManiacalHunterPlugin extends Plugin
 {
 	private static final Logger log = LoggerFactory.getLogger(ManiacalHunterPlugin.class);
 	private static final String RESET_BUTTON_KEY = "resetSessionButton";
+	private static final String CONDENSED_MODE_KEY = "condensedMode";
 
 	private BufferedImage icon;
 	private Point mousePosition;
@@ -61,6 +62,9 @@ public class ManiacalHunterPlugin extends Plugin
     private ItemManager itemManager;
 
 	@Inject
+	private InfoBoxManager infoBoxManager;
+
+	@Inject
 	private Gson gson;
 
 	@Inject
@@ -73,6 +77,8 @@ public class ManiacalHunterPlugin extends Plugin
 
 	@Inject
 	private ManiacalHunterOverlay overlay;
+
+	private ManiacalHunterInfoBox infoBox;
 
 	private int lastPerfectTails = 0;
 	private int lastDamagedTails = 0;
@@ -101,7 +107,8 @@ public class ManiacalHunterPlugin extends Plugin
 		loadSession();
 		reset();
 		icon = itemManager.getImage(24864);
-		overlayManager.add(overlay);
+		infoBox = new ManiacalHunterInfoBox(this, config, icon);
+		updateDisplayMode();
 	}
 
 	@Override
@@ -109,6 +116,7 @@ public class ManiacalHunterPlugin extends Plugin
 	{
 		log.info("Maniacal Hunter stopped!");
 		saveSession();
+		infoBoxManager.removeInfoBox(infoBox);
 		overlayManager.remove(overlay);
 	}
 
@@ -368,13 +376,35 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
-		if (event.getGroup().equals(CONFIG_GROUP) && event.getKey().equals(RESET_BUTTON_KEY))
+		if (!event.getGroup().equals(CONFIG_GROUP))
+		{
+			return;
+		}
+		if (event.getKey().equals(RESET_BUTTON_KEY))
 		{
 			if (config.resetSession())
 			{
 				reset();
 				configManager.setConfiguration(CONFIG_GROUP, RESET_BUTTON_KEY, false);
 			}
+		}
+		if (event.getKey().equals(CONDENSED_MODE_KEY))
+		{
+			updateDisplayMode();
+		}
+	}
+
+	private void updateDisplayMode()
+	{
+		infoBoxManager.removeInfoBox(infoBox);
+		overlayManager.remove(overlay);
+		if (config.condensedMode())
+		{
+			infoBoxManager.addInfoBox(infoBox);
+		}
+		else
+		{
+			overlayManager.add(overlay);
 		}
 	}
 }
