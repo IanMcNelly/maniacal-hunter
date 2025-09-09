@@ -4,30 +4,47 @@ A RuneLite plugin to track your stats while hunting maniacal monkeys in Kruk's d
 
 ## Features
 
-### Core Functionality
-*   Track amount of XP received
-*   Track number of monkeys caught.
-*   Track number of traps laid.
-*   Track last trap status.
-*   Track time spent in the dungeon.
-*   Track monkey catch success rate
-*   Track number of perfect tails received
-*   Track dryness of getting perfect tail
+### Tracking
+*   **Monkeys:** Track the number of monkeys caught and calculate monkeys/hour.
+*   **Traps:** Track the number of traps laid and the success rate of your traps.
+*   **Last Trap Status:** See the real-time status of your last trap ("Trap set", "Trap triggered", "Monkey caught").
+*   **Session Time:** Keep track of the time spent hunting in the current session.
+*   **Tails:** Track the number of perfect and damaged monkey tails received.
+*   **Dryness:** See how many damaged tails you've received since your last perfect tail.
+*   **Session and Aggregate Tracking:** Track your stats on a per-session basis, and also view your aggregate stats saved across all sessions.
+*   **Average Catch Time:** See the average time it takes to catch a monkey.
 
-### Overlay
-*   Fully customizable overlay to display your hunting stats.
-*   Choose which stats to display.
-*   Toggle between session, aggregate, or both display modes.
-
-### Advanced Features
-*   Calculate and display experience rates (XP/hour).
-*   Calculate and display monkeys caught per hour.
-*   Averge time per catch.
-*   Session-based tracking, with the ability to track hunting on a per session and cross session basis
+### Display
+*   **Two Display Modes:** Choose between a detailed overlay or a compact infobox.
+    *   **Full Overlay:** A fully customizable overlay that can display all of your hunting stats. You can choose which stats to show.
+    *   **Condensed Infobox:** A simple infobox that shows your session stats at a glance.
+*   **Display Toggles:** Toggle between showing session stats, aggregate stats, or both.
 
 ### Notifications
-*   Customizable milestone notifications for monkeys caught.
+*   **Milestone Notifications:** Receive notifications for customizable monkey-catching milestones.
+
+## Configuration
+
+The plugin offers several configuration options to tailor your experience:
+
+*   **Display Mode:** Switch between the full overlay and the condensed infobox.
+*   **Auto-Reset:** Automatically reset your session stats when entering or leaving the maniacal monkey hunter area.
+*   **Manual Reset:** A button in the settings panel to manually reset your current session stats.
+*   **Milestone Notifications:** Enable or disable milestone notifications and set the interval at which they trigger.
+*   **Stat Toggles:** In the full overlay mode, you can toggle the visibility of each individual stat.
 
 ## Screenshots
 
-_Coming soon..._
+Below are some screenshots of the plugin in action.
+
+**1. The Full Overlay**
+
+![img.png](img.png)
+
+**2. The Condensed Infobox**
+
+![img_1.png](img_1.png)
+
+**3. The Configuration Panel**
+
+![img_2.png](img_2.png) 
