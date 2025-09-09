@@ -29,7 +29,7 @@ public interface ManiacalHunterConfig extends Config
 	@ConfigItem(
 			keyName = "condensedMode",
 			name = "Condensed Mode",
-			description = "Display the overlay in a condensed mode",
+			description = "Display stats in an infobox.",
 			section = displaySection
 	)
 	default boolean condensedMode()
