@@ -17,7 +17,7 @@ public class ManiacalHunterOverlay extends OverlayPanel
 {
 	private final ManiacalHunterPlugin plugin;
 	private final ManiacalHunterConfig config;
-	private final BufferedImage icon;
+    private final ImageComponent imageComponent;
 	private final Client client;
 
 	@Inject
@@ -26,8 +26,8 @@ public class ManiacalHunterOverlay extends OverlayPanel
 		super(plugin);
 		this.plugin = plugin;
 		this.config = config;
-		this.icon = plugin.getIcon();
 		this.client = client;
+        this.imageComponent = new ImageComponent(plugin.getIcon());
 		setPosition(OverlayPosition.TOP_LEFT);
 	}
 
@@ -50,7 +50,7 @@ public class ManiacalHunterOverlay extends OverlayPanel
 
 		if (config.condensedMode() && !getBounds().contains(new java.awt.Point(plugin.getMouseCanvasPosition().getX(), plugin.getMouseCanvasPosition().getY())))
 		{
-			panelComponent.getChildren().add(new ImageComponent(icon));
+            panelComponent.getChildren().add(imageComponent);
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left("Caught:")
 				.right(formatStat(session.getMonkeysCaught(), aggregateSession.getMonkeysCaught()))
@@ -62,13 +62,6 @@ public class ManiacalHunterOverlay extends OverlayPanel
 			.text("Maniacal Hunter")
 			.color(Color.WHITE)
 			.build());
-
-		if (config.showXpGained()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("XP Gained:")
-				.right(formatStat(session.getXpGained(), aggregateSession.getXpGained()))
-				.build());
-		}
 
 		if (config.showMonkeysCaught()) {
 			panelComponent.getChildren().add(LineComponent.builder()
@@ -123,13 +116,6 @@ public class ManiacalHunterOverlay extends OverlayPanel
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left("Luck:")
 				.right(formatPercentage(session.getLuckPercentage(), aggregateSession.getLuckPercentage()))
-				.build());
-		}
-
-		if (config.showXpPerHour()) {
-			panelComponent.getChildren().add(LineComponent.builder()
-				.left("XP/Hour:")
-				.right(formatDouble(session.getXpPerHour(), aggregateSession.getXpPerHour()))
 				.build());
 		}
 

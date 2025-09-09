@@ -20,7 +20,7 @@ public class ManiacalHunterConstants
 	public static final int LIFTED_BOULDER = 28833;
 
 	// Region IDs
-	public static final int MANIACAL_HUNTER_REGION = 10093;
+	public static final int MANIACAL_HUNTER_REGION = 11662;
 
 	public static final Set<Integer> BOULDER_TRAP_IDS = ImmutableSet.of(
 		UNSET_BOULDER_TRAP,

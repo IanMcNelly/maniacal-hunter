@@ -28,6 +28,7 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.Notifier;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.api.Point;
 import org.slf4j.Logger;
@@ -40,7 +41,6 @@ public class ManiacalHunterPlugin extends Plugin
 {
 	private static final Logger log = LoggerFactory.getLogger(ManiacalHunterPlugin.class);
 	private static final String RESET_BUTTON_KEY = "resetSessionButton";
-	private static final String ICON_FILE = "condensed_icon.png";
 
 	private BufferedImage icon;
 	private Point mousePosition;
@@ -56,6 +56,9 @@ public class ManiacalHunterPlugin extends Plugin
 
 	@Inject
 	private ConfigManager configManager;
+
+    @Inject
+    private ItemManager itemManager;
 
 	@Inject
 	private Gson gson;
@@ -73,6 +76,8 @@ public class ManiacalHunterPlugin extends Plugin
 
 	private int lastPerfectTails = 0;
 	private int lastDamagedTails = 0;
+	private int catchesThisTick = 0;
+	private int lastTick = 0;
 	private int lastHunterXp = -1;
 	private boolean inHunterArea = false;
 
@@ -81,6 +86,9 @@ public class ManiacalHunterPlugin extends Plugin
 		session.reset();
 		lastPerfectTails = 0;
 		lastDamagedTails = 0;
+		lastHunterXp = -1;
+		catchesThisTick = 0;
+		lastTick = 0;
 	}
 
 	private static final String CONFIG_GROUP = "maniacalhunter";
@@ -92,7 +100,7 @@ public class ManiacalHunterPlugin extends Plugin
 		log.info("Maniacal Hunter started!");
 		loadSession();
 		reset();
-		icon = ImageUtil.loadImageResource(getClass(), ICON_FILE);
+		icon = itemManager.getImage(24864);
 		overlayManager.add(overlay);
 	}
 
@@ -142,28 +150,26 @@ public class ManiacalHunterPlugin extends Plugin
 		int perfectTailsGained = currentPerfectTails - lastPerfectTails;
 		int damagedTailsGained = currentDamagedTails - lastDamagedTails;
 
-		if (perfectTailsGained > 0)
+		if (catchesThisTick > 0 && (perfectTailsGained > 0 || damagedTailsGained > 0))
 		{
-			session.incrementPerfectTails();
-			aggregateSession.incrementPerfectTails();
-			session.incrementMonkeysCaught();
-			aggregateSession.incrementMonkeysCaught();
-			if (config.milestoneNotification() && session.getMonkeysCaught() % config.milestoneInterval() == 0)
+			if (perfectTailsGained > 0)
 			{
-				notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
+				session.incrementPerfectTails();
+				aggregateSession.incrementPerfectTails();
 			}
-		}
+			if (damagedTailsGained > 0)
+			{
+				session.incrementDamagedTails();
+				aggregateSession.incrementDamagedTails();
+			}
 
-		if (damagedTailsGained > 0)
-		{
-			session.incrementDamagedTails();
-			aggregateSession.incrementDamagedTails();
 			session.incrementMonkeysCaught();
 			aggregateSession.incrementMonkeysCaught();
 			if (config.milestoneNotification() && session.getMonkeysCaught() % config.milestoneInterval() == 0)
 			{
 				notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
 			}
+			catchesThisTick--;
 		}
 
 		lastPerfectTails = currentPerfectTails;
@@ -173,11 +179,16 @@ public class ManiacalHunterPlugin extends Plugin
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
-		if (!isInManiacalHunterArea())
+  
+    if (!isInManiacalHunterArea())
 		{
 			return;
 		}
-
+		if (client.getTickCount() != lastTick)
+		{
+			catchesThisTick = 0;
+			lastTick = client.getTickCount();
+    }
 		if (session.getSessionStartTime() != null)
 		{
 			session.setDuration(Duration.between(session.getSessionStartTime(), Instant.now()));
@@ -247,26 +258,28 @@ public class ManiacalHunterPlugin extends Plugin
 
 		int currentXp = statChanged.getXp();
 		int gainedXp = currentXp - lastHunterXp;
+
+		if (gainedXp > 0 && gainedXp % 1000 == 0)
+		{
+			catchesThisTick += gainedXp / 1000;
+		}
+		
 		lastHunterXp = currentXp;
 
 		if (gainedXp > 0)
 		{
-			// Current session
 			if (session.getSessionStartTime() == null)
 			{
-				session.startSession(currentXp - gainedXp);
+				session.startSession();
 			}
-			session.setXpGained(session.getXpGained() + gainedXp);
 
-			// Aggregate session
 			if (aggregateSession.getSessionStartTime() == null)
 			{
-				aggregateSession.startSession(currentXp - gainedXp);
+				aggregateSession.startSession();
 			}
-			aggregateSession.setXpGained(aggregateSession.getXpGained() + gainedXp);
 		}
 	}
-
+  
 	private static final int MAX_DISTANCE = 2;
 
 	@Subscribe
@@ -292,11 +305,6 @@ public class ManiacalHunterPlugin extends Plugin
 			aggregateSession.incrementTrapsLaid();
 			session.setLastTrapStatus("Trap set");
 			aggregateSession.setLastTrapStatus("Trap set");
-		}
-		else if (id == ManiacalHunterConstants.UNSET_BOULDER_TRAP)
-		{
-			session.setLastTrapStatus("Trap not set");
-			aggregateSession.setLastTrapStatus("Trap not set");
 		}
 		else if (id == ManiacalHunterConstants.TRIGGERED_BOULDER_TRAP_1 || id == ManiacalHunterConstants.TRIGGERED_BOULDER_TRAP_2)
 		{
