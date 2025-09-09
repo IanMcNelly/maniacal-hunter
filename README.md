@@ -38,10 +38,13 @@ The plugin offers several configuration options to tailor your experience:
 Below are some screenshots of the plugin in action.
 
 **1. The Full Overlay**
-> A screenshot showing the Maniacal Hunter overlay in the game. The overlay should be configured to show stats like monkeys/hour, traps laid, success rate, and session time.
+
+![img.png](img.png)
 
 **2. The Condensed Infobox**
-> A screenshot of the condensed infobox. This should show the small infobox in the corner of the screen, displaying a summary of session stats.
+
+![img_1.png](img_1.png)
 
 **3. The Configuration Panel**
-> A screenshot of the Maniacal Hunter plugin settings within the RuneLite configuration panel. This should display all the available options, such as the display mode toggle, auto-reset options, and milestone notification settings.
+
+![img_2.png](img_2.png) 

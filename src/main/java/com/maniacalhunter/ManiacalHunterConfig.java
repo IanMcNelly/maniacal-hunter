@@ -15,16 +15,6 @@ public interface ManiacalHunterConfig extends Config
 	)
 	String displaySection = "display";
 
-	@ConfigItem(
-			keyName = "showXpGained",
-			name = "Show XP Gained",
-			description = "Show the total XP gained",
-			section = displaySection
-	)
-	default boolean showXpGained()
-	{
-		return true;
-	}
 
 	@ConfigItem(
 			keyName = "condensedMode",
@@ -139,17 +129,6 @@ public interface ManiacalHunterConfig extends Config
 			section = displaySection
 	)
 	default boolean showLuck()
-	{
-		return true;
-	}
-
-	@ConfigItem(
-			keyName = "showXpPerHour",
-			name = "Show XP/Hour",
-			description = "Show the average XP gained per hour",
-			section = displaySection
-	)
-	default boolean showXpPerHour()
 	{
 		return true;
 	}
