@@ -7,8 +7,6 @@ public class ManiacalHunterSession
 {
 	private Instant sessionStartTime;
 	private Duration duration;
-	private int startXp;
-	private int xpGained;
 	private int monkeysCaught;
 	private int trapsLaid;
 	private String lastTrapStatus;
@@ -16,18 +14,15 @@ public class ManiacalHunterSession
 	private int damagedTails;
 	private int damagedTailsSincePerfect;
 
-	public void startSession(int startXp)
+	public void startSession()
 	{
 		this.sessionStartTime = Instant.now();
-		this.startXp = startXp;
 	}
 
 	public void reset()
 	{
 		this.sessionStartTime = null;
 		this.duration = null;
-		this.startXp = 0;
-		this.xpGained = 0;
 		this.monkeysCaught = 0;
 		this.trapsLaid = 0;
 		this.lastTrapStatus = "N/A";
@@ -85,15 +80,6 @@ public class ManiacalHunterSession
 		return (double) monkeysCaught / (duration.toMillis() / 3600000.0);
 	}
 
-	public double getXpPerHour()
-	{
-		if (duration == null || duration.isZero())
-		{
-			return 0;
-		}
-		return (double) xpGained / (duration.toMillis() / 3600000.0);
-	}
-
 	public double getAverageTimePerCatch()
 	{
 		if (monkeysCaught == 0 || duration == null || duration.isZero())
@@ -106,8 +92,6 @@ public class ManiacalHunterSession
 	// Getters
 	public Instant getSessionStartTime() { return sessionStartTime; }
 	public Duration getDuration() { return duration; }
-	public int getStartXp() { return startXp; }
-	public int getXpGained() { return xpGained; }
 	public int getMonkeysCaught() { return monkeysCaught; }
 	public int getTrapsLaid() { return trapsLaid; }
 	public String getLastTrapStatus() { return lastTrapStatus; }
@@ -118,8 +102,6 @@ public class ManiacalHunterSession
 	// Setters
 	public void setSessionStartTime(Instant sessionStartTime) { this.sessionStartTime = sessionStartTime; }
 	public void setDuration(Duration duration) { this.duration = duration; }
-	public void setStartXp(int startXp) { this.startXp = startXp; }
-	public void setXpGained(int xpGained) { this.xpGained = xpGained; }
 	public void setMonkeysCaught(int monkeysCaught) { this.monkeysCaught = monkeysCaught; }
 	public void setTrapsLaid(int trapsLaid) { this.trapsLaid = trapsLaid; }
 	public void setLastTrapStatus(String lastTrapStatus) { this.lastTrapStatus = lastTrapStatus; }

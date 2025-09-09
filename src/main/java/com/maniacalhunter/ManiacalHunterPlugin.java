@@ -270,15 +270,13 @@ public class ManiacalHunterPlugin extends Plugin
 		{
 			if (session.getSessionStartTime() == null)
 			{
-				session.startSession(currentXp - gainedXp);
+				session.startSession();
 			}
-			session.setXpGained(session.getXpGained() + gainedXp);
 
 			if (aggregateSession.getSessionStartTime() == null)
 			{
-				aggregateSession.startSession(currentXp - gainedXp);
+				aggregateSession.startSession();
 			}
-			aggregateSession.setXpGained(aggregateSession.getXpGained() + gainedXp);
 		}
 	}
   
@@ -307,11 +305,6 @@ public class ManiacalHunterPlugin extends Plugin
 			aggregateSession.incrementTrapsLaid();
 			session.setLastTrapStatus("Trap set");
 			aggregateSession.setLastTrapStatus("Trap set");
-		}
-		else if (id == ManiacalHunterConstants.UNSET_BOULDER_TRAP)
-		{
-			session.setLastTrapStatus("Trap not set");
-			aggregateSession.setLastTrapStatus("Trap not set");
 		}
 		else if (id == ManiacalHunterConstants.TRIGGERED_BOULDER_TRAP_1 || id == ManiacalHunterConstants.TRIGGERED_BOULDER_TRAP_2)
 		{
