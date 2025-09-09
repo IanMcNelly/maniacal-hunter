@@ -41,6 +41,7 @@ public class ManiacalHunterPlugin extends Plugin
 {
 	private static final Logger log = LoggerFactory.getLogger(ManiacalHunterPlugin.class);
 	private static final String RESET_BUTTON_KEY = "resetSessionButton";
+	private static final String CONDENSED_MODE_KEY = "condensedMode";
 
 	private BufferedImage icon;
 	private Point mousePosition;
@@ -105,7 +106,7 @@ public class ManiacalHunterPlugin extends Plugin
 		log.info("Maniacal Hunter started!");
 		loadSession();
 		reset();
-		icon = ImageUtil.loadImageResource(getClass(), "/icon.png");
+		icon = itemManager.getImage(24864);
 		infoBox = new ManiacalHunterInfoBox(this, config, icon);
 		updateDisplayMode();
 	}
@@ -387,7 +388,7 @@ public class ManiacalHunterPlugin extends Plugin
 				configManager.setConfiguration(CONFIG_GROUP, RESET_BUTTON_KEY, false);
 			}
 		}
-		if (event.getKey().equals("condensedMode"))
+		if (event.getKey().equals(CONDENSED_MODE_KEY))
 		{
 			updateDisplayMode();
 		}
