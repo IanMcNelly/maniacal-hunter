@@ -148,7 +148,8 @@ public interface ManiacalHunterConfig extends Config
 			keyName = "displayMode",
 			name = "Display Mode",
 			description = "Choose how to display stats in the overlay",
-			position = 1
+			position = 1,
+			section = displaySection
 	)
 	default DisplayMode displayMode()
 	{

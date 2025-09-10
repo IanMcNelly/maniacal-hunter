@@ -8,6 +8,7 @@ public class ManiacalHunterConstants
 	// Item IDs
 	public static final int DAMAGED_MONKEY_TAIL = 19665;
 	public static final int PERFECT_MONKEY_TAIL = 19610;
+	public static final int MANIACAL_ITEM_ID = 24864;
 
 	// Object IDs
 	public static final int UNSET_BOULDER_TRAP = 28824;
@@ -21,6 +22,9 @@ public class ManiacalHunterConstants
 
 	// Region IDs
 	public static final int MANIACAL_HUNTER_REGION = 11662;
+
+	// Other
+	public static final int MANIACAL_MONKEY_XP = 1000;
 
 	public static final Set<Integer> BOULDER_TRAP_IDS = ImmutableSet.of(
 		UNSET_BOULDER_TRAP,

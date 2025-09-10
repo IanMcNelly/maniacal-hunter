@@ -3,13 +3,11 @@ package com.maniacalhunter;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import javax.inject.Inject;
 
 import net.runelite.api.Client;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.components.ImageComponent;
 import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 
@@ -17,7 +15,6 @@ public class ManiacalHunterOverlay extends OverlayPanel
 {
 	private final ManiacalHunterPlugin plugin;
 	private final ManiacalHunterConfig config;
-    private final ImageComponent imageComponent;
 	private final Client client;
 
 	@Inject
@@ -27,7 +24,6 @@ public class ManiacalHunterOverlay extends OverlayPanel
 		this.plugin = plugin;
 		this.config = config;
 		this.client = client;
-        this.imageComponent = new ImageComponent(plugin.getIcon());
 		setPosition(OverlayPosition.TOP_LEFT);
 	}
 
@@ -56,14 +52,14 @@ public class ManiacalHunterOverlay extends OverlayPanel
 		if (config.showMonkeysCaught()) {
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left("Monkeys Caught:")
-				.right(formatStat(session.getMonkeysCaught(), aggregateSession.getMonkeysCaught()))
+				.right(ManiacalHunterFormatting.formatStat(session.getMonkeysCaught(), aggregateSession.getMonkeysCaught(), config.displayMode()))
 				.build());
 		}
 
 		if (config.showTrapsLaid()) {
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left("Traps Laid:")
-				.right(formatStat(session.getTrapsLaid(), aggregateSession.getTrapsLaid()))
+				.right(ManiacalHunterFormatting.formatStat(session.getTrapsLaid(), aggregateSession.getTrapsLaid(), config.displayMode()))
 				.build());
 		}
 
@@ -77,35 +73,35 @@ public class ManiacalHunterOverlay extends OverlayPanel
 		if (config.showSuccessRate()) {
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left("Success Rate:")
-				.right(formatPercentage(session.getSuccessRate(), aggregateSession.getSuccessRate()))
+				.right(ManiacalHunterFormatting.formatPercentage(session.getSuccessRate(), aggregateSession.getSuccessRate(), config.displayMode()))
 				.build());
 		}
 
 		if (config.showMonkeysPerHour()) {
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left("Monkeys/Hour:")
-				.right(formatDouble(session.getMonkeysPerHour(), aggregateSession.getMonkeysPerHour()))
+				.right(ManiacalHunterFormatting.formatDouble(session.getMonkeysPerHour(), aggregateSession.getMonkeysPerHour(), config.displayMode()))
 				.build());
 		}
 
 		if (config.showPerfectTails()) {
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left("Perfect Tails:")
-				.right(formatStat(session.getPerfectTails(), aggregateSession.getPerfectTails()))
+				.right(ManiacalHunterFormatting.formatStat(session.getPerfectTails(), aggregateSession.getPerfectTails(), config.displayMode()))
 				.build());
 		}
 
 		if (config.showDamagedTails()) {
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left("Damaged Tails:")
-				.right(formatStat(session.getDamagedTails(), aggregateSession.getDamagedTails()))
+				.right(ManiacalHunterFormatting.formatStat(session.getDamagedTails(), aggregateSession.getDamagedTails(), config.displayMode()))
 				.build());
 		}
 
 		if (config.showLuck()) {
 			panelComponent.getChildren().add(LineComponent.builder()
 				.left("Luck:")
-				.right(formatPercentage(session.getLuckPercentage(), aggregateSession.getLuckPercentage()))
+				.right(ManiacalHunterFormatting.formatPercentage(session.getLuckPercentage(), aggregateSession.getLuckPercentage(), config.displayMode()))
 				.build());
 		}
 
@@ -117,50 +113,5 @@ public class ManiacalHunterOverlay extends OverlayPanel
 		}
 
 		return super.render(graphics);
-	}
-
-	private String formatStat(int session, int aggregate)
-	{
-		switch (config.displayMode())
-		{
-			case SESSION_ONLY:
-				return String.valueOf(session);
-			case AGGREGATE_ONLY:
-				return String.valueOf(aggregate);
-			case BOTH:
-				return String.format("%d (%d)", session, aggregate);
-			default:
-				return "";
-		}
-	}
-
-	private String formatPercentage(double session, double aggregate)
-	{
-		switch (config.displayMode())
-		{
-			case SESSION_ONLY:
-				return String.format("%.2f%%", session);
-			case AGGREGATE_ONLY:
-				return String.format("%.2f%%", aggregate);
-			case BOTH:
-				return String.format("%.2f%% (%.2f%%)", session, aggregate);
-			default:
-				return "";
-		}
-	}
-
-	private String formatDouble(double session, double aggregate)
-	{
-		switch (config.displayMode())
-		{
-			case SESSION_ONLY:
-				return String.format("%.2f", session);
-			case AGGREGATE_ONLY:
-				return String.format("%.2f", aggregate);
-			case BOTH:
-				return String.format("%.2f (%.2f)", session, aggregate);
-			default:
-				return "";
-		}
 	}
 }

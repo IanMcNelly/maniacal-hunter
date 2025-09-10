@@ -2,7 +2,6 @@ package com.maniacalhunter;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import net.runelite.client.plugins.Plugin;
 import net.runelite.client.ui.overlay.infobox.InfoBox;
 
 public class ManiacalHunterInfoBox extends InfoBox
@@ -39,12 +38,12 @@ public class ManiacalHunterInfoBox extends InfoBox
 
 		if (config.showMonkeysCaught()) {
 			sb.append("</br>");
-			sb.append("Monkeys Caught: ").append(formatStat(session.getMonkeysCaught(), aggregateSession.getMonkeysCaught()));
+			sb.append("Monkeys Caught: ").append(ManiacalHunterFormatting.formatStat(session.getMonkeysCaught(), aggregateSession.getMonkeysCaught(), config.displayMode()));
 		}
 
 		if (config.showTrapsLaid()) {
 			sb.append("</br>");
-			sb.append("Traps Laid: ").append(formatStat(session.getTrapsLaid(), aggregateSession.getTrapsLaid()));
+			sb.append("Traps Laid: ").append(ManiacalHunterFormatting.formatStat(session.getTrapsLaid(), aggregateSession.getTrapsLaid(), config.displayMode()));
 		}
 
 		if (config.showLastTrapStatus()) {
@@ -54,27 +53,27 @@ public class ManiacalHunterInfoBox extends InfoBox
 
 		if (config.showSuccessRate()) {
 			sb.append("</br>");
-			sb.append("Success Rate: ").append(formatPercentage(session.getSuccessRate(), aggregateSession.getSuccessRate()));
+			sb.append("Success Rate: ").append(ManiacalHunterFormatting.formatPercentage(session.getSuccessRate(), aggregateSession.getSuccessRate(), config.displayMode()));
 		}
 
 		if (config.showMonkeysPerHour()) {
 			sb.append("</br>");
-			sb.append("Monkeys/Hour: ").append(formatDouble(session.getMonkeysPerHour(), aggregateSession.getMonkeysPerHour()));
+			sb.append("Monkeys/Hour: ").append(ManiacalHunterFormatting.formatDouble(session.getMonkeysPerHour(), aggregateSession.getMonkeysPerHour(), config.displayMode()));
 		}
 
 		if (config.showPerfectTails()) {
 			sb.append("</br>");
-			sb.append("Perfect Tails: ").append(formatStat(session.getPerfectTails(), aggregateSession.getPerfectTails()));
+			sb.append("Perfect Tails: ").append(ManiacalHunterFormatting.formatStat(session.getPerfectTails(), aggregateSession.getPerfectTails(), config.displayMode()));
 		}
 
 		if (config.showDamagedTails()) {
 			sb.append("</br>");
-			sb.append("Damaged Tails: ").append(formatStat(session.getDamagedTails(), aggregateSession.getDamagedTails()));
+			sb.append("Damaged Tails: ").append(ManiacalHunterFormatting.formatStat(session.getDamagedTails(), aggregateSession.getDamagedTails(), config.displayMode()));
 		}
 
 		if (config.showLuck()) {
 			sb.append("</br>");
-			sb.append("Luck: ").append(formatPercentage(session.getLuckPercentage(), aggregateSession.getLuckPercentage()));
+			sb.append("Luck: ").append(ManiacalHunterFormatting.formatPercentage(session.getLuckPercentage(), aggregateSession.getLuckPercentage(), config.displayMode()));
 		}
 
 		if (config.showAvgCatchTime()) {
@@ -83,50 +82,5 @@ public class ManiacalHunterInfoBox extends InfoBox
 		}
 
 		return sb.toString();
-	}
-
-	private String formatStat(int session, int aggregate)
-	{
-		switch (config.displayMode())
-		{
-			case SESSION_ONLY:
-				return String.valueOf(session);
-			case AGGREGATE_ONLY:
-				return String.valueOf(aggregate);
-			case BOTH:
-				return String.format("%d (%d)", session, aggregate);
-			default:
-				return "";
-		}
-	}
-
-	private String formatPercentage(double session, double aggregate)
-	{
-		switch (config.displayMode())
-		{
-			case SESSION_ONLY:
-				return String.format("%.2f%%", session);
-			case AGGREGATE_ONLY:
-				return String.format("%.2f%%", aggregate);
-			case BOTH:
-				return String.format("%.2f%% (%.2f%%)", session, aggregate);
-			default:
-				return "";
-		}
-	}
-
-	private String formatDouble(double session, double aggregate)
-	{
-		switch (config.displayMode())
-		{
-			case SESSION_ONLY:
-				return String.format("%.2f", session);
-			case AGGREGATE_ONLY:
-				return String.format("%.2f", aggregate);
-			case BOTH:
-				return String.format("%.2f (%.2f)", session, aggregate);
-			default:
-				return "";
-		}
 	}
 }
