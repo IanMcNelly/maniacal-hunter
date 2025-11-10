@@ -1,6 +1,5 @@
 package com.maniacalhunter;
 
-import com.google.gson.Gson;
 import com.google.inject.Provides;
 import java.awt.image.BufferedImage;
 import java.time.Duration;
@@ -39,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public class ManiacalHunterPlugin extends Plugin
 {
 	private static final Logger log = LoggerFactory.getLogger(ManiacalHunterPlugin.class);
+	private static final String CONFIG_GROUP = "maniacalhunter";
 	private static final String RESET_BUTTON_KEY = "resetSessionButton";
 	private static final String CONDENSED_MODE_KEY = "condensedMode";
 
@@ -65,11 +65,8 @@ public class ManiacalHunterPlugin extends Plugin
 	@Inject
 	private InfoBoxManager infoBoxManager;
 
-	@Inject
-	private Gson gson;
-
 	@Getter
-    @Inject
+	@Inject
 	private ManiacalHunterSession session;
 
 	@Getter
@@ -93,15 +90,20 @@ public class ManiacalHunterPlugin extends Plugin
 	private void reset()
 	{
 		session.reset();
-		lastPerfectTails = 0;
-		lastDamagedTails = 0;
-		lastHunterXp = -1;
 		catchesThisTick = 0;
 		lastTick = 0;
-	}
+        lastPerfectTails = 0;
+        lastDamagedTails = 0;
 
-	private static final String CONFIG_GROUP = "maniacalhunter";
-	private static final String AGGREGATE_SESSION_KEY = "aggregateSession";
+		if (client.getGameState() == GameState.LOGGED_IN)
+		{
+			lastHunterXp = client.getSkillExperience(Skill.HUNTER);
+		}
+		else
+		{
+			lastHunterXp = -1;
+		}
+	}
 
 	@Override
 	protected void startUp() throws Exception
@@ -117,24 +119,20 @@ public class ManiacalHunterPlugin extends Plugin
 	protected void shutDown() throws Exception
 	{
 		log.info("Maniacal Hunter stopped!");
-		saveSession();
 		infoBoxManager.removeInfoBox(infoBox);
 		overlayManager.remove(overlay);
 	}
 
-	private void saveSession()
-	{
-		String json = gson.toJson(aggregateSession);
-		configManager.setConfiguration(CONFIG_GROUP, AGGREGATE_SESSION_KEY, json);
-	}
-
 	private void loadSession()
 	{
-		String json = configManager.getConfiguration(CONFIG_GROUP, AGGREGATE_SESSION_KEY);
-		if (json != null)
-		{
-			aggregateSession = gson.fromJson(json, ManiacalHunterSession.class);
-		}
+		aggregateSession.setSessionStartTimeMillis(config.getSessionStartTime());
+		aggregateSession.setDurationMillis(config.getDuration());
+		aggregateSession.setMonkeysCaught(config.getMonkeysCaught());
+		aggregateSession.setTrapsLaid(config.getTrapsLaid());
+		aggregateSession.setLastTrapStatus(config.getLastTrapStatus());
+		aggregateSession.setPerfectTails(config.getPerfectTails());
+		aggregateSession.setDamagedTails(config.getDamagedTails());
+		aggregateSession.setDamagedTailsSincePerfect(config.getDamagedTailsSincePerfect());
 	}
 
 	@Subscribe
@@ -198,6 +196,7 @@ public class ManiacalHunterPlugin extends Plugin
 		if (aggregateSession.getSessionStartTime() != null)
 		{
 			aggregateSession.setDuration(Duration.between(aggregateSession.getSessionStartTime(), Instant.now()));
+			config.setDuration(aggregateSession.getDurationMillis());
 		}
 	}
 
@@ -277,6 +276,7 @@ public class ManiacalHunterPlugin extends Plugin
 			if (aggregateSession.getSessionStartTime() == null)
 			{
 				aggregateSession.startSession();
+				config.setSessionStartTime(aggregateSession.getSessionStartTimeMillis());
 			}
 		}
 	}
@@ -318,6 +318,7 @@ public class ManiacalHunterPlugin extends Plugin
 	{
 		session.incrementMonkeysCaught();
 		aggregateSession.incrementMonkeysCaught();
+		config.setMonkeysCaught(aggregateSession.getMonkeysCaught());
 		if (config.milestoneNotification() && session.getMonkeysCaught() > 0 && session.getMonkeysCaught() % config.milestoneInterval() == 0)
 		{
 			notifier.notify("Maniacal Hunter milestone: " + session.getMonkeysCaught() + " monkeys caught!");
@@ -327,22 +328,28 @@ public class ManiacalHunterPlugin extends Plugin
 	private void handlePerfectTailGain() {
 		session.incrementPerfectTails();
 		aggregateSession.incrementPerfectTails();
+		config.setPerfectTails(aggregateSession.getPerfectTails());
+		config.setDamagedTailsSincePerfect(aggregateSession.getDamagedTailsSincePerfect());
 	}
 
 	private void handleDamagedTailGain() {
 		session.incrementDamagedTails();
 		aggregateSession.incrementDamagedTails();
+		config.setDamagedTails(aggregateSession.getDamagedTails());
+		config.setDamagedTailsSincePerfect(aggregateSession.getDamagedTailsSincePerfect());
 	}
 
 	private void handleTrapLaid() {
 		session.incrementTrapsLaid();
 		aggregateSession.incrementTrapsLaid();
+		config.setTrapsLaid(aggregateSession.getTrapsLaid());
 		updateLastTrapStatus("Trap set");
 	}
 
 	private void updateLastTrapStatus(String status) {
 		session.setLastTrapStatus(status);
 		aggregateSession.setLastTrapStatus(status);
+		config.setLastTrapStatus(aggregateSession.getLastTrapStatus());
 	}
 
 	@Provides

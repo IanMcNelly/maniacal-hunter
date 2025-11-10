@@ -202,4 +202,148 @@ public interface ManiacalHunterConfig extends Config
 	{
 		return 100;
 	}
+
+	@ConfigItem(
+			keyName = "sessionStartTime",
+			name = "Session Start Time",
+			description = "The time the session started",
+			hidden = true
+	)
+	default long getSessionStartTime()
+	{
+		return 0L;
+	}
+
+	@ConfigItem(
+			keyName = "sessionStartTime",
+			name = "Session Start Time",
+			description = "The time the session started"
+	)
+	void setSessionStartTime(long time);
+
+	@ConfigItem(
+			keyName = "duration",
+			name = "Duration",
+			description = "The session duration in milliseconds",
+			hidden = true
+	)
+	default long getDuration()
+	{
+		return 0L;
+	}
+
+	@ConfigItem(
+			keyName = "duration",
+			name = "Duration",
+			description = "The session duration in milliseconds"
+	)
+	void setDuration(long time);
+
+	@ConfigItem(
+			keyName = "monkeysCaught",
+			name = "Monkeys Caught",
+			description = "The number of monkeys caught",
+			hidden = true
+	)
+	default int getMonkeysCaught()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+			keyName = "monkeysCaught",
+			name = "Monkeys Caught",
+			description = "The number of monkeys caught"
+	)
+	void setMonkeysCaught(int count);
+
+	@ConfigItem(
+			keyName = "trapsLaid",
+			name = "Traps Laid",
+			description = "The number of traps laid",
+			hidden = true
+	)
+	default int getTrapsLaid()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+			keyName = "trapsLaid",
+			name = "Traps Laid",
+			description = "The number of traps laid"
+	)
+	void setTrapsLaid(int count);
+
+	@ConfigItem(
+			keyName = "lastTrapStatus",
+			name = "Last Trap Status",
+			description = "The status of the last trap",
+			hidden = true
+	)
+	default String getLastTrapStatus()
+	{
+		return "N/A";
+	}
+
+	@ConfigItem(
+			keyName = "lastTrapStatus",
+			name = "Last Trap Status",
+			description = "The status of the last trap"
+	)
+	void setLastTrapStatus(String status);
+
+	@ConfigItem(
+			keyName = "perfectTails",
+			name = "Perfect Tails",
+			description = "The number of perfect tails",
+			hidden = true
+	)
+	default int getPerfectTails()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+			keyName = "perfectTails",
+			name = "Perfect Tails",
+			description = "The number of perfect tails"
+	)
+	void setPerfectTails(int count);
+
+	@ConfigItem(
+			keyName = "damagedTails",
+			name = "Damaged Tails",
+			description = "The number of damaged tails",
+			hidden = true
+	)
+	default int getDamagedTails()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+			keyName = "damagedTails",
+			name = "Damaged Tails",
+			description = "The number of damaged tails"
+	)
+	void setDamagedTails(int count);
+
+	@ConfigItem(
+			keyName = "damagedTailsSincePerfect",
+			name = "Damaged Tails Since Perfect",
+			description = "The number of damaged tails since the last perfect tail",
+			hidden = true
+	)
+	default int getDamagedTailsSincePerfect()
+	{
+		return 0;
+	}
+
+	@ConfigItem(
+			keyName = "damagedTailsSincePerfect",
+			name = "Damaged Tails Since Perfect",
+			description = "The number of damaged tails since the last perfect tail"
+	)
+	void setDamagedTailsSincePerfect(int count);
 }

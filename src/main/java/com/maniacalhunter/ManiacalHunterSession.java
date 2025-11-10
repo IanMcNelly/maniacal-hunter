@@ -14,33 +14,39 @@ public class ManiacalHunterSession
 	private static final double MILLIS_PER_SECOND = 1_000.0;
 
     @Getter
-    private Instant sessionStartTime;
+	@Setter
+    private long sessionStartTimeMillis;
 	@Getter
 	@Setter
-    private Duration duration;
+    private long durationMillis;
 	@Getter
+	@Setter
     private int monkeysCaught;
 	@Getter
+	@Setter
     private int trapsLaid;
 	@Getter
     @Setter
     private String lastTrapStatus;
 	@Getter
+	@Setter
     private int perfectTails;
 	@Getter
+	@Setter
     private int damagedTails;
 	@Getter
+	@Setter
 	private int damagedTailsSincePerfect;
 
 	public void startSession()
 	{
-		this.sessionStartTime = Instant.now();
+		this.sessionStartTimeMillis = Instant.now().toEpochMilli();
 	}
 
 	public void reset()
 	{
-		this.sessionStartTime = null;
-		this.duration = null;
+		this.sessionStartTimeMillis = 0;
+		this.durationMillis = 0;
 		this.monkeysCaught = 0;
 		this.trapsLaid = 0;
 		this.lastTrapStatus = "N/A";
@@ -93,20 +99,34 @@ public class ManiacalHunterSession
 
 	public double getMonkeysPerHour()
 	{
-		if (duration == null || duration.isZero())
+		if (durationMillis == 0)
 		{
 			return 0;
 		}
-		return (double) monkeysCaught / (duration.toMillis() / MILLIS_PER_HOUR);
+		return (double) monkeysCaught / (durationMillis / MILLIS_PER_HOUR);
 	}
 
 	public double getAverageTimePerCatch()
 	{
-		if (monkeysCaught == 0 || duration == null || duration.isZero())
+		if (monkeysCaught == 0 || durationMillis == 0)
 		{
 			return 0;
 		}
-		return (double) duration.toMillis() / monkeysCaught / MILLIS_PER_SECOND;
+		return (double) durationMillis / monkeysCaught / MILLIS_PER_SECOND;
 	}
 
+	public Instant getSessionStartTime()
+	{
+		return sessionStartTimeMillis == 0 ? null : Instant.ofEpochMilli(sessionStartTimeMillis);
+	}
+
+	public Duration getDuration()
+	{
+		return durationMillis == 0 ? null : Duration.ofMillis(durationMillis);
+	}
+
+	public void setDuration(Duration duration)
+	{
+		this.durationMillis = duration.toMillis();
+	}
 }
