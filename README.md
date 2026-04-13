@@ -2,6 +2,9 @@
 
 A RuneLite plugin to track your stats while hunting maniacal monkeys in Kruk's dungeon, and display those stats in an overlay.
 
+[![Active Installs](http://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/installs/plugin/maniacal-hunter)](https://runelite.net/plugin-hub/snakeman2058) [![Plugin Rank](http://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/rank/plugin/maniacal-hunter)](https://runelite.net/plugin-hub)
+
+
 ## Features
 
 ### Tracking
@@ -47,4 +50,4 @@ Below are some screenshots of the plugin in action.
 
 **3. The Configuration Panel**
 
-![img_2.png](img_2.png) 
+![img_2.png](img_2.png)
